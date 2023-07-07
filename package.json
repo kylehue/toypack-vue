@@ -1,6 +1,6 @@
 {
-   "name": "library-template",
-   "description": "",
+   "name": "toypack-vue",
+   "description": "Vue plugin for Toypack.",
    "version": "0.0.0-development",
    "type": "module",
    "main": "./build/index.js",

@@ -1,6 +1,6 @@
 const path = require("path");
 
-const libraryName = "Library";
+const libraryName = "ToypackVue";
 module.exports = {
    mode: "production",
    entry: "./src/index.ts",
