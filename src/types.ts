@@ -14,4 +14,8 @@ export type VirtualModules = Record<
 export interface Options {
    compiler?: TemplateCompiler;
    compilerOptions?: CompilerOptions;
+   featureFlags?: {
+      __VUE_OPTIONS_API__?: boolean;
+      __VUE_PROD_DEVTOOLS__?: boolean;
+   };
 }

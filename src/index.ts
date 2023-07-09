@@ -26,5 +26,22 @@ export default function (options?: Options): Plugin {
             }
          }
       },
+      transform({type, traverse}) {
+         if (type != "script") return;
+         traverse({
+            Identifier(path) {
+               if (path.node.name == "__VUE_OPTIONS_API__") {
+                  path.node.name = options?.featureFlags?.__VUE_OPTIONS_API__
+                     ? "true"
+                     : "true";
+               }
+               if (path.node.name == "__VUE_PROD_DEVTOOLS__") {
+                  path.node.name = options?.featureFlags?.__VUE_PROD_DEVTOOLS__
+                     ? "true"
+                     : "false";
+               }
+            },
+         });
+      }
    };
 }
