@@ -5,7 +5,7 @@
       "lib": ["es2022", "dom"],
       "module": "esnext",
       "target": "es2022",
-      "moduleResolution": "node",
+      "moduleResolution": "nodenext",
       "rootDir": "./src",
       "outDir": "build",
       "baseUrl": ".",
