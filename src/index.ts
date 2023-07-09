@@ -28,17 +28,23 @@ export default function (options?: Options): Plugin {
       },
       transform({type, traverse}) {
          if (type != "script") return;
+         const optionsAPI = options?.featureFlags?.__VUE_OPTIONS_API__;
+         const prodDevtools = options?.featureFlags?.__VUE_PROD_DEVTOOLS__;
          traverse({
             Identifier(path) {
                if (path.node.name == "__VUE_OPTIONS_API__") {
-                  path.node.name = options?.featureFlags?.__VUE_OPTIONS_API__
-                     ? "true"
-                     : "true";
+                  if (optionsAPI === false) {
+                     path.node.name = "false";
+                  } else {
+                     path.node.name = "true";
+                  }
                }
                if (path.node.name == "__VUE_PROD_DEVTOOLS__") {
-                  path.node.name = options?.featureFlags?.__VUE_PROD_DEVTOOLS__
-                     ? "true"
-                     : "false";
+                  if (prodDevtools === true) {
+                     path.node.name = "true";
+                  } else {
+                     path.node.name = "false";
+                  }
                }
             },
          });
