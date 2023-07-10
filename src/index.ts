@@ -17,16 +17,13 @@ export default function (options?: Options): Plugin {
          });
       },
       load(moduleInfo) {
-         const importers = this.getImporters();
-         for (const importer in importers) {
-            const virtualModules = cache.get(this.getConfigHash(), importer);
-            if (!virtualModules) continue;
-            if (moduleInfo.source in virtualModules) {
-               return virtualModules[moduleInfo.source];
-            }
+         if (moduleInfo.type != "virtual") return;
+         const cached = cache.get(this.getConfigHash(), moduleInfo.source);
+         if (cached) {
+            return cached;
          }
       },
-      transform({type, traverse}) {
+      transform({ type, traverse }) {
          if (type != "script") return;
          const optionsAPI = options?.featureFlags?.__VUE_OPTIONS_API__;
          const prodDevtools = options?.featureFlags?.__VUE_PROD_DEVTOOLS__;
@@ -48,6 +45,6 @@ export default function (options?: Options): Plugin {
                }
             },
          });
-      }
+      },
    };
 }

@@ -67,6 +67,11 @@ export default function (options?: Options): Loader {
             map: compiledScript.map,
             lang: compiledScript.lang ?? "js",
          };
+         cache.set(
+            this.getConfigHash(),
+            virtualScriptId,
+            virtualModules[virtualScriptId]
+         );
 
          if (compiledScript.map) {
             compiledScript.map.sources = [virtualScriptId];
@@ -107,6 +112,11 @@ export default function (options?: Options): Loader {
             map: compiledTemplate.map,
             lang: "js",
          };
+         cache.set(
+            this.getConfigHash(),
+            virtualTemplateId,
+            virtualModules[virtualTemplateId]
+         );
 
          if (compiledTemplate.map) {
             compiledTemplate.map.sources = [virtualTemplateId];
@@ -148,6 +158,11 @@ export default function (options?: Options): Loader {
                map: compiledStyle.map,
                lang: style.lang ?? "css",
             };
+            cache.set(
+               this.getConfigHash(),
+               virtualStyleId,
+               virtualModules[virtualStyleId]
+            );
 
             if (compiledStyle.map) {
                compiledStyle.map.sources = [virtualTemplateId];
@@ -159,9 +174,7 @@ export default function (options?: Options): Loader {
             compiledStyles[style.lang ?? "css"].push(compiledStyle);
          }
 
-         cache.set(this.getConfigHash(), moduleInfo.source, virtualModules);
-
-         return `
+         const mainContent = `
 ${this.getImportCode(virtualScriptId, [{ name: "script", isDefault: true }])}
 ${this.getImportCode(virtualTemplateId, ["render"])}
 ${styleImports.join("\n")}
@@ -171,6 +184,14 @@ script.__file = "${moduleInfo.source}";
 script.__scopeId = "${scopeId}";
 export default script;
 `;
+         
+         cache.set(this.getConfigHash(), moduleInfo.source, {
+            type: "script",
+            lang: "js",
+            content: mainContent,
+         });
+
+         return mainContent;
       },
    };
 }
