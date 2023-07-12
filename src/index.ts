@@ -1,5 +1,4 @@
 import { Plugin } from "toypack/types";
-import * as cache from "./cache.js";
 import vueLoader from "./loader.js";
 import { Options } from "./types.js";
 
@@ -10,15 +9,14 @@ export default function (options?: Options): Plugin {
       loaders: [vueLoader(options)],
       buildStart() {
          // Remove in cache if the assets doesn't exist anymore
-         const configHash = this.getConfigHash();
-         cache.forEach(configHash, (source) => {
+         this.eachCache((value, source) => {
             if (this.bundler.getAsset(source)) return;
-            cache.remove(configHash, source);
+            this.removeCache(source);
          });
       },
       load(moduleInfo) {
          if (moduleInfo.type != "virtual") return;
-         const cached = cache.get(this.getConfigHash(), moduleInfo.source);
+         const cached = this.getCache(moduleInfo.source, true);
          if (cached) {
             return cached;
          }

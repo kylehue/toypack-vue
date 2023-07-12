@@ -7,7 +7,6 @@ import {
 } from "@vue/compiler-sfc";
 import { Loader } from "toypack/types";
 import { getHash } from "toypack/utils";
-import * as cache from "./cache.js";
 import { Options, VirtualModules } from "./types.js";
 
 export default function (options?: Options): Loader {
@@ -15,7 +14,7 @@ export default function (options?: Options): Loader {
       test: /\.vue$/,
       compile(moduleInfo) {
          if (typeof moduleInfo.content != "string") {
-            this.error("Blob contents are not supported.");
+            this.emitError("Blob contents are not supported.");
             return;
          }
 
@@ -27,7 +26,7 @@ export default function (options?: Options): Loader {
          });
 
          if (errors.length) {
-            this.error(errors[0].message);
+            this.emitError(errors[0].message);
             return;
          }
 
@@ -56,7 +55,7 @@ export default function (options?: Options): Loader {
 
          if (compiledScript.warnings?.length) {
             for (const warn of compiledScript.warnings) {
-               this.warn(warn);
+               this.emitWarning(warn);
             }
          }
 
@@ -67,11 +66,7 @@ export default function (options?: Options): Loader {
             map: compiledScript.map,
             lang: compiledScript.lang ?? "js",
          };
-         cache.set(
-            this.getConfigHash(),
-            virtualScriptId,
-            virtualModules[virtualScriptId]
-         );
+         this.setCache(virtualScriptId, virtualModules[virtualScriptId], true);
 
          if (compiledScript.map) {
             compiledScript.map.sources = [virtualScriptId];
@@ -90,10 +85,10 @@ export default function (options?: Options): Loader {
                prefixIdentifiers: true,
                bindingMetadata: compiledScript.bindings,
                onError: (error) => {
-                  this.error(error.message);
+                  this.emitError(error.message);
                },
                onWarn: (warning) => {
-                  this.warn(warning.message);
+                  this.emitWarning(warning.message);
                },
             },
             compiler: options?.compiler,
@@ -101,7 +96,7 @@ export default function (options?: Options): Loader {
 
          if (compiledTemplate.errors.length) {
             const error = compiledTemplate.errors[0];
-            this.error(typeof error == "string" ? error : error.message);
+            this.emitError(typeof error == "string" ? error : error.message);
             return;
          }
 
@@ -112,10 +107,10 @@ export default function (options?: Options): Loader {
             map: compiledTemplate.map,
             lang: "js",
          };
-         cache.set(
-            this.getConfigHash(),
+         this.setCache(
             virtualTemplateId,
-            virtualModules[virtualTemplateId]
+            virtualModules[virtualTemplateId],
+            true
          );
 
          if (compiledTemplate.map) {
@@ -132,7 +127,7 @@ export default function (options?: Options): Loader {
             }
 
             if (style.module) {
-               this.error("<style module> is currently not supported.");
+               this.emitError("<style module> is currently not supported.");
             }
 
             if (!style.content.trim()) continue;
@@ -145,7 +140,7 @@ export default function (options?: Options): Loader {
 
             if (compiledStyle.errors.length) {
                for (const error of compiledStyle.errors) {
-                  this.error(error.message);
+                  this.emitError(error.message);
                }
                return;
             }
@@ -158,11 +153,7 @@ export default function (options?: Options): Loader {
                map: compiledStyle.map,
                lang: style.lang ?? "css",
             };
-            cache.set(
-               this.getConfigHash(),
-               virtualStyleId,
-               virtualModules[virtualStyleId]
-            );
+            this.setCache(virtualStyleId, virtualModules[virtualStyleId], true);
 
             if (compiledStyle.map) {
                compiledStyle.map.sources = [virtualTemplateId];
@@ -184,12 +175,16 @@ script.__file = "${moduleInfo.source}";
 script.__scopeId = "${scopeId}";
 export default script;
 `;
-         
-         cache.set(this.getConfigHash(), moduleInfo.source, {
-            type: "script",
-            lang: "js",
-            content: mainContent,
-         });
+
+         this.setCache(
+            moduleInfo.source,
+            {
+               type: "script",
+               lang: "js",
+               content: mainContent,
+            },
+            true
+         );
 
          return mainContent;
       },
