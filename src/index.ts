@@ -11,7 +11,7 @@ export default function (options?: Options): Plugin {
          // Remove in cache if the assets doesn't exist anymore
          this.eachCache((value, source) => {
             if (this.bundler.getAsset(source)) return;
-            this.removeCache(source);
+            this.removeCache(source, true);
          });
       },
       load(moduleInfo) {
