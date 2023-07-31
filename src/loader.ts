@@ -38,7 +38,7 @@ export default function (options?: Options): Loader {
             inlineTemplate: false,
             reactivityTransform: false,
             isProd: bundlerConfig.bundle.mode == "production",
-            babelParserPlugins: bundlerConfig.babel.parse.plugins ?? [],
+            babelParserPlugins: bundlerConfig.parser.plugins ?? [],
             sourceMap: this.shouldMap(),
             fs: {
                fileExists: (file) => {
