@@ -18,7 +18,7 @@ export default function (options?: Options): Loader {
             return;
          }
 
-         const bundlerConfig = this.bundler.getConfig();
+         const bundlerConfig = this.bundler.config;
 
          const { errors, descriptor } = parse(moduleInfo.content, {
             filename: moduleInfo.source,
@@ -66,7 +66,7 @@ export default function (options?: Options): Loader {
             map: compiledScript.map,
             lang: compiledScript.lang ?? "js",
          };
-         this.setCache(virtualScriptId, virtualModules[virtualScriptId], true);
+         this.setCache(virtualScriptId, virtualModules[virtualScriptId]);
 
          if (compiledScript.map) {
             compiledScript.map.sources = [virtualScriptId];
@@ -107,11 +107,7 @@ export default function (options?: Options): Loader {
             map: compiledTemplate.map,
             lang: "js",
          };
-         this.setCache(
-            virtualTemplateId,
-            virtualModules[virtualTemplateId],
-            true
-         );
+         this.setCache(virtualTemplateId, virtualModules[virtualTemplateId]);
 
          if (compiledTemplate.map) {
             compiledTemplate.map.sources = [virtualTemplateId];
@@ -153,7 +149,7 @@ export default function (options?: Options): Loader {
                map: compiledStyle.map,
                lang: style.lang ?? "css",
             };
-            this.setCache(virtualStyleId, virtualModules[virtualStyleId], true);
+            this.setCache(virtualStyleId, virtualModules[virtualStyleId]);
 
             if (compiledStyle.map) {
                compiledStyle.map.sources = [virtualTemplateId];
@@ -176,15 +172,11 @@ script.__scopeId = "${scopeId}";
 export default script;
 `;
 
-         this.setCache(
-            moduleInfo.source,
-            {
-               type: "script",
-               lang: "js",
-               content: mainContent,
-            },
-            true
-         );
+         this.setCache(moduleInfo.source, {
+            type: "script",
+            lang: "js",
+            content: mainContent,
+         });
 
          return mainContent;
       },
