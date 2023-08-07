@@ -21,28 +21,43 @@ export default function (options?: Options): Plugin {
             return cached;
          }
       },
-      transform({ type, traverse }) {
-         if (type != "script") return;
+      transform() {
          const optionsAPI = options?.featureFlags?.__VUE_OPTIONS_API__;
          const prodDevtools = options?.featureFlags?.__VUE_PROD_DEVTOOLS__;
-         traverse({
+         if (
+            typeof optionsAPI !== "boolean" &&
+            typeof prodDevtools !== "boolean"
+         ) {
+            return;
+         }
+
+         return {
             Identifier(path) {
-               if (path.node.name == "__VUE_OPTIONS_API__") {
-                  if (optionsAPI === false) {
-                     path.node.name = "false";
-                  } else {
-                     path.node.name = "true";
-                  }
+               const { scope, node, parentPath } = path;
+               if (
+                  node.name !== "__VUE_OPTIONS_API__" &&
+                  node.name !== "__VUE_PROD_DEVTOOLS__"
+               ) {
+                  return;
                }
-               if (path.node.name == "__VUE_PROD_DEVTOOLS__") {
-                  if (prodDevtools === true) {
-                     path.node.name = "true";
-                  } else {
-                     path.node.name = "false";
-                  }
+               const isGlobal = !scope.getBinding(node.name);
+               if (!isGlobal) return;
+               if (parentPath.isMemberExpression()) return;
+               if (
+                  parentPath.isObjectProperty() &&
+                  parentPath.node.key === node
+               ) {
+                  return;
                }
+               path.replaceWith({
+                  type: "BooleanLiteral",
+                  value:
+                     node.name === "__VUE_OPTIONS_API__"
+                        ? !!optionsAPI
+                        : !!prodDevtools,
+               });
             },
-         });
+         };
       },
    };
 }
